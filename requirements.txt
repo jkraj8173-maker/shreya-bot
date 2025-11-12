@@ -2,4 +2,6 @@ python-telegram-bot==20.3
 flask
 openai
 tinydb
+python-dotenv
+
 
