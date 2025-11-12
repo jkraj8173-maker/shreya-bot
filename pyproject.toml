@@ -1,0 +1,13 @@
+[project]
+name = "shreya-ai-girlfriend-bot"
+version = "0.1.0"
+description = "Shreya - AI Girlfriend Telegram Bot"
+authors = ["Your Name <you@example.com>"]
+requires-python = ">=3.11"
+dependencies = [
+    "python-telegram-bot==22.5",
+    "openai>=1.0.0",
+    "tinydb>=4.8.0",
+    "python-dotenv>=1.0.0",
+    "flask>=3.0.0"
+]
