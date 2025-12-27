@@ -1,0 +1,6 @@
+tinydb
+openai
+python-dotenv
+python-telegram-bot
+flask
+gunicorn

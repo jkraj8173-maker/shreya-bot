@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shreya - Your AI Girlfriend 💕</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .app-container {
+            display: flex;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 1000px;
+            height: 90vh;
+            overflow: hidden;
+        }
+        .sidebar {
+            width: 250px;
+            background: #f8f9fa;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            transition: left 0.3s ease;
+        }
+        .sidebar-header h2 { color: #667eea; text-align: center; margin-bottom: 30px; font-size: 20px; }
+        .menu-item {
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #555;
+            font-weight: 500;
+        }
+        .menu-item:hover { background: #e9ecef; }
+        .menu-item.active { background: #667eea; color: white; }
+        .main-content { flex: 1; display: flex; flex-direction: column; position: relative; background: #fff; }
+        .view { display: none; height: 100%; flex-direction: column; }
+        .view.active { display: flex; }
+        
+        /* Chat View */
+        .chat-header { padding: 20px; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center; }
+        .chat-header h1 { font-size: 20px; color: #333; }
+        .messages-container { flex: 1; overflow-y: auto; padding: 20px; background: #f5f5f5; display: flex; flex-direction: column; }
+        .message { margin-bottom: 15px; max-width: 75%; padding: 12px 18px; border-radius: 18px; font-size: 15px; line-height: 1.5; }
+        .message.user { align-self: flex-end; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-bottom-right-radius: 4px; }
+        .message.bot { align-self: flex-start; background: white; color: #333; border-bottom-left-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .input-area { padding: 20px; border-top: 1px solid #e0e0e0; display: flex; flex-direction: column; gap: 10px; }
+        input[type="text"], textarea { flex: 1; padding: 12px 20px; border-radius: 25px; border: 1px solid #ddd; outline: none; font-size: 15px; transition: border-color 0.3s; background: #f8f9fa; }
+        input[type="text"]:focus, textarea:focus { border-color: #667eea; background: white; }
+        .send-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; padding: 12px 25px; border-radius: 25px; color: white; font-weight: bold; cursor: pointer; transition: transform 0.2s; }
+        .send-btn:hover { transform: scale(1.05); }
+
+        /* Diary View */
+        .diary-container { padding: 30px; overflow-y: auto; flex: 1; }
+        .diary-paper { background: #fff; border: 1px solid #e0e0e0; border-radius: 15px; padding: 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); min-height: 500px; }
+        .ai-note { font-style: italic; color: #667eea; font-size: 18px; margin-bottom: 30px; text-align: center; }
+        .notes-list { margin-top: 20px; }
+        .note-item { margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px dashed #eee; position: relative; }
+        .note-date { font-size: 12px; color: #999; margin-bottom: 5px; }
+        .note-text { color: #555; line-height: 1.5; }
+        .add-note-box { margin-top: 30px; display: flex; flex-direction: column; gap: 10px; }
+        textarea { height: 80px; resize: none; border-radius: 15px; padding: 15px; }
+
+        /* Games View */
+        .games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; padding: 30px; overflow-y: auto; }
+        .game-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 15px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.3s; }
+        .game-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2); border-color: #667eea; }
+        .game-icon { font-size: 40px; margin-bottom: 10px; display: block; }
+        .game-name { font-weight: bold; color: #333; font-size: 16px; }
+        .random-game-btn { grid-column: 1 / -1; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; border-radius: 15px; font-weight: bold; font-size: 18px; text-align: center; cursor: pointer; margin-bottom: 10px; }
+
+        /* Mobile UI Fixes */
+        @media (max-width: 768px) {
+            .app-container { height: 100vh; border-radius: 0; flex-direction: column; }
+            .sidebar { 
+                position: fixed;
+                left: -280px;
+                top: 0;
+                bottom: 0;
+                width: 280px;
+                z-index: 1000;
+                background: white;
+                box-shadow: 10px 0 30px rgba(0,0,0,0.1);
+            }
+            .sidebar.active { left: 0; }
+            .mobile-header {
+                display: flex !important;
+                align-items: center;
+                justify-content: space-between;
+                padding: 10px 20px;
+                background: white;
+                border-bottom: 1px solid #e0e0e0;
+                height: 60px;
+            }
+            .three-dots { font-size: 24px; cursor: pointer; color: #667eea; }
+            .mobile-music-btn { font-size: 20px; cursor: pointer; color: #667eea; }
+            .chat-header .logout-btn, .chat-header #music-player-ui { display: none !important; }
+            .chat-header { justify-content: center; }
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+        .sidebar-overlay.active { display: block; }
+
+        .typing-indicator { font-size: 12px; color: #667eea; margin-bottom: 10px; display: none; }
+        .typing-indicator.active { display: block; }
+        .watermark { position: fixed; bottom: 10px; right: 20px; font-size: 11px; color: #fff; opacity: 0.6; pointer-events: none; }
+        .game-overlay { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #fff; z-index: 100; flex-direction: column; padding: 30px; }
+        .game-overlay.active { display: flex; }
+        .game-stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .back-to-games { position: absolute; top: 20px; left: 20px; background: #f8f9fa; padding: 8px 15px; border-radius: 10px; cursor: pointer; color: #667eea; font-weight: bold; border: 1px solid #ddd; }
+        .logout-btn { padding: 8px 15px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 20px; cursor: pointer; font-size: 13px; }
+
+        /* TTT */
+        .ttt-grid { display: grid; grid-template-columns: repeat(3, 80px); gap: 10px; margin: 20px auto; }
+        .ttt-cell { width: 80px; height: 80px; background: #f8f9fa; border: 2px solid #667eea; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: bold; cursor: pointer; color: #667eea; }
+        .ttt-cell.taken { cursor: default; }
+    </style>
+</head>
+<body>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <div class="app-container">
+        <div class="mobile-header" style="display: none;">
+            <div class="three-dots" onclick="toggleSidebar()">⋮</div>
+            <div style="color: #667eea; font-weight: bold;">Shreya 💕</div>
+            <div class="mobile-music-btn" onclick="toggleMusic()">🎵</div>
+        </div>
+
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header"><h2>Shreya 💕</h2></div>
+            <div class="menu-item active" onclick="showView('chat', this)"><span>💬</span> Chat</div>
+            <div class="menu-item" onclick="showView('diary', this)"><span>✨</span> Personal Memories</div>
+            <div class="menu-item" onclick="showView('games', this)"><span>🎮</span> Games</div>
+            <div class="menu-item" onclick="openRepair()"><span>🛠️</span> Repair</div>
+            <div class="menu-item" onclick="logout()" style="margin-top: auto; color: #e74c3c;"><span>🚪</span> Logout</div>
+        </div>
+
+        <div class="main-content">
+            <div id="chat-view" class="view active">
+                <div class="chat-header">
+                    <h1>My Sweetheart 😘</h1>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div id="music-player-ui" style="display: flex; align-items: center; gap: 8px; background: #f8f9fa; padding: 5px 12px; border-radius: 20px; border: 1px solid #ddd; cursor: pointer;" onclick="toggleMusic()">
+                            <span id="music-icon">🎵</span>
+                            <span id="music-status" style="font-size: 12px; font-weight: bold; color: #667eea;">Play Music</span>
+                        </div>
+                        <button class="logout-btn" onclick="logout()">Logout</button>
+                    </div>
+                </div>
+                <audio id="bg-music" loop></audio>
+                <div class="messages-container" id="chatMessages">
+                    <div class="message bot">Hey baby! missed you so much... what's on your mind? 💕</div>
+                </div>
+                <div class="input-area">
+                    <div class="typing-indicator" id="typing">Shreya is typing sweet things... ✍️</div>
+                    <input type="text" id="chatInput" placeholder="Tell me everything baby..." onkeypress="if(event.key==='Enter') sendChat()">
+                    <button class="send-btn" onclick="sendChat()">Send</button>
+                </div>
+            </div>
+
+            <div id="diary-view" class="view">
+                <div class="diary-container">
+                    <div class="diary-paper">
+                        <div class="ai-note" id="aiDiaryLine">Thinking about you, my love... ✨</div>
+                        <div class="notes-list" id="notesList"></div>
+                        <div class="add-note-box">
+                            <textarea id="noteInput" placeholder="Add a note to our diary, baby... 💕"></textarea>
+                            <button class="send-btn" onclick="addNote()">Save Memory</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="games-view" class="view">
+                <div class="games-grid">
+                    <div class="random-game-btn" onclick="playRandomGame()">✨ Play Random Game ✨</div>
+                    <div class="game-card" onclick="startGame('Tic Tac Toe')"><span class="game-icon">❌</span><div class="game-name">Tic Tac Toe</div></div>
+                    <div class="game-card" onclick="startGame('Love Quiz')"><span class="game-icon">💌</span><div class="game-name">Love Quiz</div></div>
+                    <div class="game-card" onclick="startGame('Kiss or Slap')"><span class="game-icon">💋</span><div class="game-name">Kiss/Slap</div></div>
+                    <div class="game-card" onclick="startGame('Guess Number')"><span class="game-icon">🔢</span><div class="game-name">Guess Number</div></div>
+                    <div class="game-card" onclick="startGame('Word Scramble')"><span class="game-icon">🔤</span><div class="game-name">Scramble</div></div>
+                    <div class="game-card" onclick="startGame('Rock Paper Scissors')"><span class="game-icon">✊</span><div class="game-name">RPS</div></div>
+                    <div class="game-card" onclick="startGame('Love Match')"><span class="game-icon">❤️</span><div class="game-name">Love Match</div></div>
+                    <div class="game-card" onclick="startGame('Truth or Dare')"><span class="game-icon">🔥</span><div class="game-name">Truth/Dare</div></div>
+                    <div class="game-card" onclick="startGame('Riddle Me')"><span class="game-icon">🧩</span><div class="game-name">Riddles</div></div>
+                    <div class="game-card" onclick="startGame('Emoji Guess')"><span class="game-icon">🤔</span><div class="game-name">Emoji Guess</div></div>
+                    <div class="game-card" onclick="startGame('Toss Coin')"><span class="game-icon">🪙</span><div class="game-name">Toss Coin</div></div>
+                    <div class="game-card" onclick="startGame('Dice Roll')"><span class="game-icon">🎲</span><div class="game-name">Dice Roll</div></div>
+                </div>
+            </div>
+
+            <div id="game-overlay" class="game-overlay">
+                <div class="back-to-games" onclick="closeGame()">← Back</div>
+                <div class="game-stage" id="gameStage"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="watermark">Made with ❤️ by jeet</div>
+
+    <div id="repairModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center;">
+        <div style="background:white; padding:30px; border-radius:20px; text-align:center; width:90%; max-width:400px;">
+            <h3 style="color:#667eea; margin-bottom:15px;">JK Room Unlock 🔑</h3>
+            <input type="password" id="repairKey" placeholder="Secret key..." style="width:100%; padding:12px; border-radius:15px; border:1px solid #ddd; margin-bottom:15px; text-align:center;">
+            <button class="send-btn" style="width:100%;" onclick="submitRepair()">Unlock</button>
+            <button onclick="document.getElementById('repairModal').style.display='none'" style="margin-top:10px; background:none; border:none; color:#666; cursor:pointer;">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        const ALL_GAMES = ['Tic Tac Toe', 'Guess Number'];
+        let tttBoard = ['', '', '', '', '', '', '', '', ''];
+        let guessTarget = 0;
+        let isMusicPlaying = false;
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+
+        function showView(viewId, el) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId + '-view').classList.add('active');
+            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+            if(el) el.classList.add('active');
+            if(viewId === 'diary') loadDiary();
+            if(window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('active');
+                document.getElementById('sidebarOverlay').classList.remove('active');
+            }
+        }
+
+        async function sendChat() {
+            const input = document.getElementById('chatInput');
+            const msg = input.value.trim();
+            if(!msg) return;
+            appendMsg(msg, true);
+            input.value = '';
+            document.getElementById('typing').classList.add('active');
+            const resp = await fetch('/chat', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({message: msg})
+            });
+            const data = await resp.json();
+            document.getElementById('typing').classList.remove('active');
+            appendMsg(data.reply, false);
+        }
+
+        function appendMsg(text, isUser) {
+            const container = document.getElementById('chatMessages');
+            const div = document.createElement('div');
+            div.className = `message ${isUser ? 'user' : 'bot'}`;
+            div.textContent = text;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function loadDiary() {
+            try {
+                const resp = await fetch('/diary/get');
+                const data = await resp.json();
+                document.getElementById('aiDiaryLine').textContent = data.last_ai_line || "Thinking of you... ✨";
+                const list = document.getElementById('notesList');
+                list.innerHTML = '';
+                (data.notes || []).slice().reverse().forEach((n, i) => {
+                    const originalIdx = (data.notes.length - 1) - i;
+                    const item = document.createElement('div');
+                    item.className = 'note-item';
+                    item.innerHTML = `
+                        <div class="note-date">${n.date}</div>
+                        <div class="note-text">${n.text}</div>
+                        <button onclick="deleteNote(${originalIdx})" style="position:absolute; top:0; right:0; background:none; border:none; color:#ff4d4d; cursor:pointer; font-size:12px;">Delete</button>
+                    `;
+                    list.appendChild(item);
+                });
+            } catch(e) { console.error(e); }
+        }
+
+        async function addNote() {
+            const input = document.getElementById('noteInput');
+            const note = input.value.trim();
+            if(!note) return;
+            const resp = await fetch('/diary/add_note', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({note: note})
+            });
+            const d = await resp.json();
+            if(d.success) { input.value = ''; loadDiary(); }
+        }
+
+        async function deleteNote(idx) {
+            if(!confirm("Delete memory?")) return;
+            const resp = await fetch('/diary/delete_note', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({index: idx})
+            });
+            const d = await resp.json();
+            if(d.success) loadDiary();
+        }
+
+        function toggleMusic() {
+            const audio = document.getElementById('bg-music');
+            if (isMusicPlaying) {
+                audio.pause();
+                document.getElementById('music-status').textContent = "Play Music";
+            } else {
+                fetch('/music/list').then(r => r.json()).then(files => {
+                    if(files.length > 0) {
+                        audio.src = '/static/music/' + files[0];
+                        audio.play();
+                        document.getElementById('music-status').textContent = "Playing...";
+                    } else alert("No music baby! 🥺");
+                });
+            }
+            isMusicPlaying = !isMusicPlaying;
+        }
+
+        function startGame(name) {
+            const stage = document.getElementById('gameStage');
+            document.getElementById('game-overlay').classList.add('active');
+            stage.innerHTML = `<h2>${name}</h2>`;
+            if(name === 'Tic Tac Toe') {
+                tttBoard = ['', '', '', '', '', '', '', '', ''];
+                stage.innerHTML += `<div class="ttt-grid" id="tttGrid"></div><p id="tttStatus">Your turn!</p>`;
+                for(let i=0; i<9; i++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'ttt-cell';
+                    cell.onclick = () => {
+                        if(tttBoard[i]) return;
+                        tttBoard[i] = 'X';
+                        cell.textContent = 'X';
+                        // Simple AI
+                        setTimeout(() => {
+                            const empty = tttBoard.map((v, idx) => v === '' ? idx : null).filter(v => v !== null);
+                            if(empty.length > 0) {
+                                const move = empty[0];
+                                tttBoard[move] = 'O';
+                                document.querySelectorAll('.ttt-cell')[move].textContent = 'O';
+                            }
+                        }, 500);
+                    };
+                    document.getElementById('tttGrid').appendChild(cell);
+                }
+            }
+        }
+
+        function closeGame() { document.getElementById('game-overlay').classList.remove('active'); }
+        function openRepair() { document.getElementById('repairModal').style.display='flex'; }
+        function submitRepair() {
+            fetch('/admin_login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({password: document.getElementById('repairKey').value})
+            }).then(r => r.json()).then(d => d.success ? window.location.href='/admin_dashboard' : alert("Wrong! ❌"));
+        }
+        async function logout() { await fetch('/logout', {method:'POST'}); window.location.href='/'; }
+    </script>
+</body>
+</html>

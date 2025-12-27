@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JK Room - Admin Dashboard 🔐</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; padding: 20px; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 800px; margin: 0 auto 20px; }
+        h2 { color: #667eea; }
+        .btn { background: #667eea; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; }
+        input { padding: 10px; border-radius: 10px; border: 1px solid #ddd; width: 200px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #eee; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>JK Room - Control Panel 🔐</h2>
+        <div style="margin-bottom: 20px;">
+            <input type="password" id="newPass" placeholder="New Web Password...">
+            <button class="btn" onclick="updatePass()">Update Password</button>
+        </div>
+        <button class="btn" onclick="location.href='/'">Back to Home</button>
+    </div>
+
+    <div class="card">
+        <h2>Users & Memories</h2>
+        <table id="userTable">
+            <thead>
+                <tr><th>ID</th><th>Mood</th><th>Memory Snippet</th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <script>
+        function updatePass() {
+            const pw = document.getElementById('newPass').value;
+            fetch('/admin/update_password', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({password: pw})
+            }).then(r => r.json()).then(d => d.success ? alert("Updated! ✅") : alert("Failed! ❌"));
+        }
+
+        fetch('/admin/users').then(r => r.json()).then(users => {
+            const tbody = document.querySelector('#userTable tbody');
+            users.forEach(u => {
+                const row = `<tr><td>${u.id}</td><td>${u.mood}</td><td>${(u.memory || '').substring(0, 50)}...</td></tr>`;
+                tbody.innerHTML += row;
+            });
+        });
+    </script>
+</body>
+</html>
