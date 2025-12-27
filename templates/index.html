@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shreya - Your AI Girlfriend 💕</title>
+    <title>Jeet - Your AI Boyfriend 💙</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -129,6 +129,24 @@
         .typing-indicator { font-size: 12px; color: #667eea; margin-bottom: 10px; display: none; }
         .typing-indicator.active { display: block; }
         .watermark { position: fixed; bottom: 10px; right: 20px; font-size: 11px; color: #fff; opacity: 0.6; pointer-events: none; }
+
+        /* Repair Modal */
+        .repair-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .repair-modal.active { display: flex; }
+        .repair-dialog { background: white; border-radius: 20px; padding: 30px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
+        .repair-dialog h2 { color: #667eea; margin-bottom: 20px; }
+        .repair-dialog input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; margin-bottom: 20px; }
+        .repair-dialog button { background: #667eea; color: white; border: none; padding: 12px 30px; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        .repair-dialog button:hover { background: #5a67d8; }
+
+        /* Repair View */
+        .repair-container { padding: 30px; overflow-y: auto; flex: 1; }
+        .repair-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .repair-card { background: white; border: 1px solid #e0e0e0; border-radius: 15px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.3s; }
+        .repair-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2); border-color: #667eea; }
+        .repair-icon { font-size: 40px; margin-bottom: 10px; }
+        .repair-name { font-weight: bold; color: #333; font-size: 16px; }
+
         .game-overlay { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #fff; z-index: 100; flex-direction: column; padding: 30px; }
         .game-overlay.active { display: flex; }
         .game-stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
@@ -146,12 +164,12 @@
     <div class="app-container">
         <div class="mobile-header" style="display: none;">
             <div class="three-dots" onclick="toggleSidebar()">⋮</div>
-            <div style="color: #667eea; font-weight: bold;">Shreya 💕</div>
+            <div style="color: #667eea; font-weight: bold;">Jeet 💙</div>
             <div class="mobile-music-btn" onclick="toggleMusic()">🎵</div>
         </div>
 
         <div class="sidebar" id="sidebar">
-            <div class="sidebar-header"><h2>Shreya 💕</h2></div>
+            <div class="sidebar-header"><h2>Jeet 💙</h2></div>
             <div class="menu-item active" onclick="showView('chat', this)"><span>💬</span> Chat</div>
             <div class="menu-item" onclick="showView('diary', this)"><span>✨</span> Personal Memories</div>
             <div class="menu-item" onclick="showView('games', this)"><span>🎮</span> Games</div>
@@ -162,7 +180,7 @@
         <div class="main-content">
             <div id="chat-view" class="view active">
                 <div class="chat-header">
-                    <h1>My Sweetheart 😘</h1>
+                    <h1>Chat with Jeet 💙</h1>
                     <div style="display: flex; align-items: center; gap: 15px;">
                         <div id="music-player-ui" style="display: flex; align-items: center; gap: 8px; background: #f8f9fa; padding: 5px 12px; border-radius: 20px; border: 1px solid #ddd; cursor: pointer;" onclick="toggleMusic()">
                             <span id="music-icon">🎵</span>
@@ -176,7 +194,7 @@
                     <div class="message bot">Hey baby! missed you so much... what's on your mind? 💕</div>
                 </div>
                 <div class="input-area">
-                    <div class="typing-indicator" id="typing">Shreya is typing sweet things... ✍️</div>
+                    <div class="typing-indicator" id="typing">Jeet is typing sweet things... ✍️</div>
                     <input type="text" id="chatInput" placeholder="Tell me everything baby..." onkeypress="if(event.key==='Enter') sendChat()">
                     <button class="send-btn" onclick="sendChat()">Send</button>
                 </div>
@@ -185,7 +203,7 @@
             <div id="diary-view" class="view">
                 <div class="diary-container">
                     <div class="diary-paper">
-                        <div class="ai-note" id="aiDiaryLine">Thinking about you, my love... ✨</div>
+                        <div class="ai-note" id="aiDiaryLine">Thinking of you bubu... ✨</div>
                         <div class="notes-list" id="notesList"></div>
                         <div class="add-note-box">
                             <textarea id="noteInput" placeholder="Add a note to our diary, baby... 💕"></textarea>
@@ -213,6 +231,26 @@
                 </div>
             </div>
 
+            <div id="repair-view" class="view">
+                <div class="repair-container">
+                    <h1 style="text-align: center; color: #667eea; margin-bottom: 30px;">🛠️ Jeet Repair Center</h1>
+                    <div class="repair-options">
+                        <div class="repair-card" onclick="viewAllHistory()">
+                            <div class="repair-icon">📜</div>
+                            <div class="repair-name">View All Chat History</div>
+                        </div>
+                        <div class="repair-card" onclick="clearUserData()">
+                            <div class="repair-icon">🗑️</div>
+                            <div class="repair-name">Clear Data for User</div>
+                        </div>
+                        <div class="repair-card" onclick="deleteUnwantedData()">
+                            <div class="repair-icon">🧹</div>
+                            <div class="repair-name">Delete Unwanted Data</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div id="game-overlay" class="game-overlay">
                 <div class="back-to-games" onclick="closeGame()">← Back</div>
                 <div class="game-stage" id="gameStage"></div>
@@ -220,11 +258,11 @@
         </div>
     </div>
 
-    <div class="watermark">Made with ❤️ by jeet</div>
+    <div class="watermark">Made with ❤️ by Jeet</div>
 
     <div id="repairModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center;">
         <div style="background:white; padding:30px; border-radius:20px; text-align:center; width:90%; max-width:400px;">
-            <h3 style="color:#667eea; margin-bottom:15px;">JK Room Unlock 🔑</h3>
+            <h3 style="color:#667eea; margin-bottom:15px;">Repair Key 🔑</h3>
             <input type="password" id="repairKey" placeholder="Secret key..." style="width:100%; padding:12px; border-radius:15px; border:1px solid #ddd; margin-bottom:15px; text-align:center;">
             <button class="send-btn" style="width:100%;" onclick="submitRepair()">Unlock</button>
             <button onclick="document.getElementById('repairModal').style.display='none'" style="margin-top:10px; background:none; border:none; color:#666; cursor:pointer;">Cancel</button>
@@ -251,6 +289,21 @@
             if(window.innerWidth <= 768) {
                 document.getElementById('sidebar').classList.remove('active');
                 document.getElementById('sidebarOverlay').classList.remove('active');
+            }
+        }
+
+        function openRepair() {
+            document.getElementById('repairModal').style.display = 'flex';
+            document.getElementById('repairKey').focus();
+        }
+
+        async function submitRepair() {
+            const key = document.getElementById('repairKey').value;
+            if(key === 'admin') {
+                document.getElementById('repairModal').style.display = 'none';
+                showView('repair');
+            } else {
+                alert('Wrong key! ❌');
             }
         }
 
@@ -284,7 +337,7 @@
             try {
                 const resp = await fetch('/diary/get');
                 const data = await resp.json();
-                document.getElementById('aiDiaryLine').textContent = data.last_ai_line || "Thinking of you... ✨";
+                document.getElementById('aiDiaryLine').textContent = data.last_ai_line || "Thinking of you bubu... ✨";
                 const list = document.getElementById('notesList');
                 list.innerHTML = '';
                 (data.notes || []).slice().reverse().forEach((n, i) => {
@@ -374,13 +427,48 @@
         function closeGame() { document.getElementById('game-overlay').classList.remove('active'); }
         function openRepair() { document.getElementById('repairModal').style.display='flex'; }
         function submitRepair() {
-            fetch('/admin_login', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({password: document.getElementById('repairKey').value})
-            }).then(r => r.json()).then(d => d.success ? window.location.href='/admin_dashboard' : alert("Wrong! ❌"));
+            const key = document.getElementById('repairKey').value;
+            if(key === 'admin') {
+                document.getElementById('repairModal').style.display = 'none';
+                showView('repair');
+            } else {
+                alert('Wrong key! ❌');
+            }
         }
         async function logout() { await fetch('/logout', {method:'POST'}); window.location.href='/'; }
+
+        // Repair Functions
+        async function viewAllHistory() {
+            const resp = await fetch('/repair/history');
+            const data = await resp.json();
+            let history = 'All Chat History:\n\n';
+            data.forEach(msg => {
+                history += `${msg.timestamp}: ${msg.user_id}: ${msg.message} -> ${msg.response}\n`;
+            });
+            alert(history); // For simplicity, use alert; can make a modal later
+        }
+
+        async function clearUserData() {
+            const userId = prompt('Enter User ID to clear data:');
+            if(userId) {
+                const resp = await fetch('/repair/clear_user', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({user_id: parseInt(userId)})
+                });
+                const data = await resp.json();
+                alert(data.message);
+            }
+        }
+
+        async function deleteUnwantedData() {
+            const confirm = window.confirm('Delete all messages older than 30 days?');
+            if(confirm) {
+                const resp = await fetch('/repair/delete_old', {method: 'POST'});
+                const data = await resp.json();
+                alert(data.message);
+            }
+        }
     </script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-tinydb
+psycopg2-binary
 openai
 python-dotenv
 python-telegram-bot

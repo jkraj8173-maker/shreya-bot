@@ -1,17 +1,22 @@
-# Shreya - AI Girlfriend Telegram Bot
+# Jeet - AI Boyfriend Telegram Bot
 
 ## Overview
-Shreya is a smart, caring AI girlfriend bot running 24/7 on Telegram with a simple web interface.
+Jeet is a smart, caring AI boyfriend bot running 24/7 on Telegram with a secret web interface for Aradhya.
 
 ## Project Structure
 - `main.py`: Core logic for both Telegram and Web.
 - `templates/`: HTML files for the web interface.
 - `static/`: CSS, JS, and music assets.
-- `memory.json`: Local database for conversation history.
+- `Neon Database`: PostgreSQL for conversation history.
 
 ## Setup
-1. Set environment secrets: `TG_TOKEN`, `OPENAI_KEY`, `OWNER_ID`.
+1. Set environment secrets: `TG_TOKEN`, `OPENAI_KEY`, `OWNER_ID`, `BOT_NAME`, `GF_NAME`, `WEB_PASSWORD`, `DATABASE_URL`.
 2. Run `python main.py`.
+
+## Replit Configuration
+- **Runtime**: Python
+- **Build Command**: `pip install -r requirements.txt`
+- **Start Command**: `gunicorn main:app`
 
 ## Features
 - AI Chat via Telegram and Web.
